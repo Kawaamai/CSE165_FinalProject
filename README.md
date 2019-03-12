@@ -3,7 +3,7 @@
 ## Project Members
 
 - Alan Mai
-- Stephan O'Loughlin
+- Stephen O'Loughlin
 
 ## Project Description
 
