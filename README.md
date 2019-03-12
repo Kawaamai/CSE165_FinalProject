@@ -28,4 +28,4 @@ VR-like 'The Force Awakens' sandbox game. With one hand, allow the user to use t
 ## Screenshots
 
 Holding with cone pointer. Can also throw objects.
-![Holding1](https://github.com/Kawaamai/CSE165_FinalProject/blob/master/Screenshot%20(11).png?raw=true)
+![Holding1](Screenshot%20(11).png)
