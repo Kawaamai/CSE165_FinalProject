@@ -26,5 +26,5 @@ VR-like 'The Force Awakens' sandbox game. With one hand, allow the user to use t
 - Easter eggs.???
 
 ## Screenshots
-
-TODO:
+      
+![Holding1](https://github.com/Kawaamai/CSE165_FinalProject/blob/master/Screenshot%20(11).png?raw=true)
