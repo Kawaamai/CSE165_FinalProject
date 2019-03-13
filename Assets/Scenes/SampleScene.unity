@@ -733,6 +733,10 @@ MonoBehaviour:
   controllers:
   - {fileID: 902717341}
   - {fileID: 551537075}
+  testObjects:
+  - {fileID: 1154696557}
+  - {fileID: 297679603}
+  - {fileID: 115659013}
 --- !u!4 &1579723102
 Transform:
   m_ObjectHideFlags: 0

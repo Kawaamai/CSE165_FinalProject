@@ -12,7 +12,7 @@ public class Manipulatable : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		
-		if (GameManager.Inst.CurrSelectedObj == this)
+		if (GameManager.Inst.CurrSelectedRObj == this || GameManager.Inst.CurrSelectedLObj == this)
 		{
 			gameObject.GetComponent<Renderer>().material.color = Color.green;
 		}
