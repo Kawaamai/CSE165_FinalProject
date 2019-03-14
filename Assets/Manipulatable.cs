@@ -4,21 +4,26 @@ using UnityEngine;
 
 public class Manipulatable : MonoBehaviour {
 
+	public GameObject indicator;
+
 	// Use this for initialization
 	void Start () {
-		
+		if (GetComponent<Rigidbody>() == null)
+		{
+			Debug.LogError("Error: Manipulatable objects should have Rigidbodies.");
+		}
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		
-		if (GameManager.Inst.CurrSelectedRObj == this || GameManager.Inst.CurrSelectedLObj == this)
+		if (GameManager.Inst.CurrSelectedRObj == this || GameManager.Inst.CurrSelectedLObj == this || GameManager.Inst.CurrLHandObservedObj == this || GameManager.Inst.CurrRHandObservedObj == this)
 		{
-			gameObject.GetComponent<Renderer>().material.color = Color.green;
+			indicator.SetActive(true);
 		}
 		else
 		{
-			gameObject.GetComponent<Renderer>().material.color = Color.white;
+			indicator.SetActive(false);
 		}
 
 	}

@@ -63,15 +63,33 @@ public class GameManager : MonoBehaviour {
 			return this.currSelectedLObj;
 		}
 	}
+	private Manipulatable currRHandObservedObj;
+	public Manipulatable CurrRHandObservedObj
+	{
+		get
+		{
+			return this.currRHandObservedObj;
+		}
+	}
+	private Manipulatable currLHandObservedObj;
+	public Manipulatable CurrLHandObservedObj
+	{
+		get
+		{
+			return this.currLHandObservedObj;
+		}
+	}
 	private float rHandObjDist;
 	private Quaternion rHandDiffQuat;
 	private Vector3 rHandLastPos;
 	private float initRHandDistFromHmd;
+	private float startRChargeTime = 0f;
 
 	private float lHandObjDist;
 	private Quaternion lHandDiffQuat;
 	private Vector3 lHandLastPos;
 	private float initLHandDistFromHmd;
+	private float startLChargeTime = 0f;
 
 	// Use this for initialization
 	void Start () {
@@ -97,19 +115,19 @@ public class GameManager : MonoBehaviour {
 		}
 		if (min != float.MaxValue && controller == 1)
 		{
-			currSelectedRObj = objs[idx];
+			currRHandObservedObj = objs[idx];
 		}
 		else if (min != float.MaxValue && controller == 0)
 		{
-			currSelectedLObj = objs[idx];
+			currLHandObservedObj = objs[idx];
 		}
 		else if (min == float.MaxValue && controller == 1)
 		{
-			currSelectedRObj = null;
+			currRHandObservedObj = null;
 		}
 		else
 		{
-			currSelectedLObj = null;
+			currLHandObservedObj = null;
 		}
 
 	}
@@ -121,6 +139,7 @@ public class GameManager : MonoBehaviour {
 		Quaternion headToController = Quaternion.LookRotation(controllers[controller].position - hmd.position);
 		if(controller == 1)
 		{
+			currSelectedRObj = currRHandObservedObj;
 			Quaternion headToObject = Quaternion.LookRotation(currSelectedRObj.transform.position - hmd.position);
 			rHandDiffQuat = headToObject * Quaternion.Inverse(headToController);
 			//Save the distances from the hand to the object and the hand from the headset.
@@ -130,6 +149,7 @@ public class GameManager : MonoBehaviour {
 		}
 		else
 		{
+			currSelectedLObj = currLHandObservedObj;
 			Quaternion headToObject = Quaternion.LookRotation(currSelectedLObj.transform.position - hmd.position);
 			lHandDiffQuat = headToObject * Quaternion.Inverse(headToController);
 			//Save the distances from the hand to the object and the hand from the headset.
@@ -170,8 +190,13 @@ public class GameManager : MonoBehaviour {
 		{
 			movementAmt = currDistFromHmd - initLHandDistFromHmd;
 		}
-		if (movementAmt > 0)
+		Debug.Log(movementAmt);
+		if (movementAmt > 0f)
 			movementAmt *= 2.5f;
+		else if (movementAmt < 0f && movementAmt > -0.1f)
+			movementAmt = 0f;
+		else if (movementAmt <= -0.1f)
+			movementAmt += 0.1f;
 		if (controller == 1)
 			rHandObjDist = rHandObjDist + movementAmt * 15f * Time.deltaTime;
 		else
@@ -204,9 +229,9 @@ public class GameManager : MonoBehaviour {
 			currSelectedRObj.gameObject.GetComponent<Rigidbody>().useGravity = true;
 			Vector3 direction = controllers[1].position - rHandLastPos;
 			direction.Normalize();
-			float magnitude = Vector3.Distance(currSelectedRObj.transform.position, hmd.position);
-			magnitude = magnitude / Vector3.Distance(controllers[1].position, hmd.position);
-			currSelectedRObj.gameObject.GetComponent<Rigidbody>().AddForce(direction * magnitude * 75f);
+			//float magnitude = Vector3.Distance(currSelectedRObj.transform.position, hmd.position);
+			float magnitude = Vector3.Distance(controllers[1].position, rHandLastPos);
+			currSelectedRObj.gameObject.GetComponent<Rigidbody>().AddForce(direction * magnitude * 30000f);
 			currSelectedRObj = null;
 		}
 		else
@@ -214,9 +239,9 @@ public class GameManager : MonoBehaviour {
 			currSelectedLObj.gameObject.GetComponent<Rigidbody>().useGravity = true;
 			Vector3 direction = controllers[0].position - lHandLastPos;
 			direction.Normalize();
-			float magnitude = Vector3.Distance(currSelectedLObj.transform.position, hmd.position);
-			magnitude = magnitude / Vector3.Distance(controllers[0].position, hmd.position);
-			currSelectedLObj.gameObject.GetComponent<Rigidbody>().AddForce(direction * magnitude * 75f);
+			//float magnitude = Vector3.Distance(currSelectedLObj.transform.position, hmd.position);
+			float magnitude = Vector3.Distance(controllers[0].position, lHandLastPos);
+			currSelectedLObj.gameObject.GetComponent<Rigidbody>().AddForce(direction * magnitude * 30000f);
 			currSelectedLObj = null;
 		}
 	}
@@ -269,6 +294,85 @@ public class GameManager : MonoBehaviour {
 
 		return 1000f;
 	}
+
+	private void chargePush(Hand hand)
+	{
+		int controller = (int)hand;
+		if (controller == 1)
+		{
+			startRChargeTime = Time.time;
+		}
+		if (controller == 0)
+		{
+			startLChargeTime = Time.time;
+		}
+	}
+
+	private void releasePushWithObj(Hand hand)
+	{
+		int controller = (int)hand;
+		if (controller == 1)
+		{
+			if(currSelectedRObj == null)
+			{
+				return;
+			}
+			//Direction should be away from the player
+			//Vector3 direction = currSelectedRObj.transform.position - hmd.position;
+			Vector3 direction = controllers[controller].forward;
+			direction.Normalize();
+			//Magnitude should be based on how long the button was held
+			float chargeTime = Time.time - startRChargeTime;
+			chargeTime = Mathf.Min(chargeTime, 2f);
+			currSelectedRObj.GetComponent<Rigidbody>().AddForce(direction * (1000f + (chargeTime * 1000f)));
+			currSelectedRObj.gameObject.GetComponent<Rigidbody>().useGravity = true;
+			currSelectedRObj = null;
+		}
+		else
+		{
+			if (currSelectedLObj == null)
+			{
+				return;
+			}
+			//Direction should be away from the player
+			//Vector3 direction = currSelectedLObj.transform.position - hmd.position;
+			Vector3 direction = controllers[controller].forward;
+			direction.Normalize();
+			//Magnitude should be based on how long the button was held
+			float chargeTime = Time.time - startLChargeTime;
+			chargeTime = Mathf.Min(chargeTime, 2f);
+			currSelectedLObj.GetComponent<Rigidbody>().AddForce(direction * (1000f + (chargeTime * 1000f)));
+			currSelectedLObj.gameObject.GetComponent<Rigidbody>().useGravity = true;
+			currSelectedLObj = null;
+		}
+	}
+
+	private void releasePushWithoutObj(Hand hand)
+	{
+		int controller = (int)hand;
+		float chargeTime = 0f;
+		if (controller == 1)
+		{
+			chargeTime = Time.time - startRChargeTime;
+		}
+		else
+		{
+			chargeTime = Time.time - startLChargeTime;
+		}
+		chargeTime = Mathf.Min(chargeTime, 2f);
+		Ray ray = new Ray(controllers[controller].position, controllers[controller].forward);
+		Manipulatable[] objs = (Manipulatable[])FindObjectsOfType<Manipulatable>();
+		for (int i = 0; i < objs.Length; i++)
+		{
+			float dist = Vector3.Cross(ray.direction, objs[i].transform.position - ray.origin).magnitude;
+			if (dist < (Mathf.Sin(45f * Mathf.Deg2Rad) * Vector3.Distance(objs[i].transform.position, hmd.position)))
+			{
+				Vector3 direction = objs[i].transform.position - controllers[controller].position;
+				direction.Normalize();
+				objs[i].GetComponent<Rigidbody>().AddForce(direction * (1000f + (chargeTime * 1000f)));
+			}
+		}
+	}
 	
 	// Update is called once per frame
 	private void Update () {
@@ -307,7 +411,7 @@ public class GameManager : MonoBehaviour {
 
 		if (!isHovering)
 		{
-            if (OVRInput.GetDown(OVRInput.RawButton.RHandTrigger) && currSelectedRObj != null)
+            if (OVRInput.GetDown(OVRInput.RawButton.RHandTrigger) && currRHandObservedObj != null)
             {
                 initializeGrab(Hand.RIGHT);
             }
@@ -325,7 +429,7 @@ public class GameManager : MonoBehaviour {
                 castRay(Hand.RIGHT);
             }
 
-            if (OVRInput.GetDown(OVRInput.RawButton.LHandTrigger) && currSelectedLObj != null)
+            if (OVRInput.GetDown(OVRInput.RawButton.LHandTrigger) && currLHandObservedObj != null)
             {
                 initializeGrab(Hand.LEFT);
             }
@@ -342,6 +446,32 @@ public class GameManager : MonoBehaviour {
             {
                 castRay(Hand.LEFT);
             }
+
+			if(OVRInput.GetDown(OVRInput.RawButton.RIndexTrigger))
+			{
+				chargePush(Hand.RIGHT);
+			}
+			else if (OVRInput.GetUp(OVRInput.RawButton.RIndexTrigger) && currSelectedRObj != null)
+			{
+				releasePushWithObj(Hand.RIGHT);
+			}
+			else if (OVRInput.GetUp(OVRInput.RawButton.RIndexTrigger) && currSelectedRObj == null)
+			{
+				releasePushWithoutObj(Hand.RIGHT);
+			}
+
+			if(OVRInput.GetDown(OVRInput.RawButton.LIndexTrigger))
+			{
+				chargePush(Hand.LEFT);
+			}
+			else if (OVRInput.GetUp(OVRInput.RawButton.LIndexTrigger) && CurrSelectedLObj != null)
+			{
+				releasePushWithObj(Hand.LEFT);
+			}
+			else if (OVRInput.GetUp(OVRInput.RawButton.LIndexTrigger) && currSelectedLObj == null)
+			{
+				releasePushWithoutObj(Hand.LEFT);
+			}
 
             if (OVRInput.GetUp(OVRInput.RawButton.A))
             {
