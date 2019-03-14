@@ -10,10 +10,41 @@ public class GameManager : MonoBehaviour {
 		RIGHT = 1
 	}
 
+	public enum MoveDir
+	{
+		NONE = 0,
+		FORWARD = 1,
+		BACKWARD = 2,
+	}
+
 	public static GameManager Inst;
 
 	public Transform hmd;
+	public CharacterController playerCharController;
+	public OVRPlayerController playerController; // may not need this
+
+	// movement
+	// Activate movement by:
+	// 1. move hands below hoverHandHeightThresh
+	// 2. keep hands between (forward/backward) head +- hoverHandDeadzone
+	// 3. open hands (might include removing thumb from controller)
+	// move forward: move hands slightly behind body; move backwards: move hands slightly infront of body
+	// Note: body direction determined by head direction
+	// both hands must be in same area to move, e.g. one hand front and one hand back will not move
+	// Deactivate movement by doing one of the following:
+	// 1. Close hands
+	// 2. move hands above hoverHandHeightThresh
+	private float moveSpeed = 2.2f;
+	private float hoverHeight = 0.5f;
+	private bool isHovering = false;
+	private float hoverHandHeightThresh = 2f;
+	private float hoverHandDeadzone = 0.15f;
+	private float hoverHandAngleThresh = 5f;
+
+	// controller
 	public Transform[] controllers;
+
+	// Manipulation
 	public GameObject[] testObjects;
 
 	private Manipulatable currSelectedRObj;
@@ -45,6 +76,7 @@ public class GameManager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		Inst = this;
+		hoverHandHeightThresh = hmd.position.y - 0.6f;
 	}
 
 	private void castRay(Hand hand)
@@ -165,6 +197,7 @@ public class GameManager : MonoBehaviour {
 	private void endGrab(Hand hand)
 	{
 		int controller = (int)hand;
+		//TODO - change currSelectedL/RObj to an array so that we can index with (int)hand
 		if (controller == 1)
 		{
 			//TODO - Calculate magnitude of change along controller's forward axis.  Add to magnitude.
@@ -187,57 +220,144 @@ public class GameManager : MonoBehaviour {
 			currSelectedLObj = null;
 		}
 	}
+
+	private bool isBothHandsBelowHoverThresh()
+	{
+		return (controllers[(int)Hand.RIGHT].position.y < hoverHandHeightThresh) && (controllers[(int)Hand.LEFT].position.y < hoverHandHeightThresh);
+	}
+
+	private bool isBothHandsInDeadzone()
+	{
+		Vector3 flatHmdForward = new Vector3(hmd.forward.x, 0f, hmd.forward.z);
+		flatHmdForward.Normalize();
+		Vector3 acutalHeadPos = hmd.position - (0.1f * flatHmdForward); // hmd position slightly infront head position
+		Vector3 rHandProj = Vector3.Project(controllers[(int)Hand.RIGHT].position - hmd.position, flatHmdForward);
+		Vector3 lHandProj = Vector3.Project(controllers[(int)Hand.LEFT].position - hmd.position, flatHmdForward);
+
+		return (rHandProj.magnitude < hoverHandDeadzone) && (lHandProj.magnitude < hoverHandDeadzone);
+	}
+
+	// check ground height (via raycast) directly below speed * forward * timeDelta
+	// move char to hoverheight above ground intersection
+	private void HoverMove(MoveDir dir)
+	{
+		if (dir == MoveDir.NONE)
+		{
+
+		}
+		else
+		{
+			Vector3 forwardDir = new Vector3(hmd.forward.x, 0f, hmd.forward.z);
+			if (dir == MoveDir.BACKWARD)
+				forwardDir *= -1;
+
+			// TODO:
+		}
+	}
+
+	// will need later for movement
+	private float getGroundHeight(Vector3 pos)
+	{
+		Ray ray = new Ray(pos, Vector3.down);
+		RaycastHit hit;
+
+		if (Physics.Raycast(ray, out hit, 1000f))
+		{
+			if (hit.collider.tag == "Ground")
+				return hit.distance;
+		}
+
+		return 1000f;
+	}
 	
 	// Update is called once per frame
-	void Update () {
+	private void Update () {
 
-		if(OVRInput.GetDown(OVRInput.RawButton.RHandTrigger) && currSelectedRObj != null)
+		hoverHandHeightThresh = hmd.position.y - 0.6f;
+		// Debug.Log(hoverHandHeightThresh);
+		// Debug.Log(controllers[1].position.y);
+		if (!OVRInput.Get(OVRInput.RawButton.RIndexTrigger) && !OVRInput.Get(OVRInput.RawButton.RHandTrigger) &&
+			!OVRInput.Get(OVRInput.RawButton.LIndexTrigger) && !OVRInput.Get(OVRInput.RawButton.LHandTrigger) &&
+			isBothHandsBelowHoverThresh() && false) // TODO: remove this false to get hovering
 		{
-			initializeGrab(Hand.RIGHT);
-		}
-		else if(OVRInput.Get(OVRInput.RawButton.RHandTrigger) && currSelectedRObj != null)
-		{
-			maintainGrab(Hand.RIGHT);
-		}
-		else if(OVRInput.GetUp(OVRInput.RawButton.RHandTrigger) && currSelectedRObj != null)
-		{
-			endGrab(Hand.RIGHT);
-			castRay(Hand.RIGHT);
-		}
-		else
-		{
-			castRay(Hand.RIGHT);
-		}
-
-		if (OVRInput.GetDown(OVRInput.RawButton.LHandTrigger) && currSelectedLObj != null)
-		{
-			initializeGrab(Hand.LEFT);
-		}
-		else if (OVRInput.Get(OVRInput.RawButton.LHandTrigger) && currSelectedLObj != null)
-		{
-			maintainGrab(Hand.LEFT);
-		}
-		else if (OVRInput.GetUp(OVRInput.RawButton.LHandTrigger) && currSelectedLObj != null)
-		{
-			endGrab(Hand.LEFT);
-			castRay(Hand.LEFT);
-		}
-		else
-		{
-			castRay(Hand.LEFT);
-		}
-
-		if (OVRInput.GetUp(OVRInput.RawButton.A))
-		{
-			testObjects[0].transform.position = new Vector3(0f, 2f, 8f);
-			testObjects[1].transform.position = new Vector3(-3.78f, 2f, 6.16f);
-			testObjects[2].transform.position = new Vector3(4.06f, 2f, 6.16f);
-			for (int i = 0; i < testObjects.Length; i++)
+			if (isBothHandsInDeadzone())
 			{
-				testObjects[i].transform.rotation = Quaternion.identity;
-				testObjects[i].GetComponent<Rigidbody>().velocity = Vector3.zero;
+				isHovering = true;
+				// move charater up 0.5
+				playerController.GravityModifier = 0;
+                // float groundDist = getGroundHeight(playerCharController.transform.position);
+                // Debug.Log(groundDist);
+                // if (groundDist - playerCharController.height < hoverHeight)
+                //     playerCharController.Move(Vector3.up * 0.5f);
+				// TODO: fix the bounce/falling after moving up
+				if (playerCharController.isGrounded)
+                    playerCharController.Move(Vector3.up * 0.5f);
 			}
 		}
+		else
+		{
+            if (isHovering)
+			{
+				playerController.GravityModifier = 1;
+                if (!playerCharController.isGrounded)
+                    playerCharController.Move(Vector3.down * 0.5f);
+			}
+			isHovering = false;
+		}
 
-	}
+		if (!isHovering)
+		{
+            if (OVRInput.GetDown(OVRInput.RawButton.RHandTrigger) && currSelectedRObj != null)
+            {
+                initializeGrab(Hand.RIGHT);
+            }
+            else if (OVRInput.Get(OVRInput.RawButton.RHandTrigger) && currSelectedRObj != null)
+            {
+                maintainGrab(Hand.RIGHT);
+            }
+            else if (OVRInput.GetUp(OVRInput.RawButton.RHandTrigger) && currSelectedRObj != null)
+            {
+                endGrab(Hand.RIGHT);
+                castRay(Hand.RIGHT);
+            }
+            else
+            {
+                castRay(Hand.RIGHT);
+            }
+
+            if (OVRInput.GetDown(OVRInput.RawButton.LHandTrigger) && currSelectedLObj != null)
+            {
+                initializeGrab(Hand.LEFT);
+            }
+            else if (OVRInput.Get(OVRInput.RawButton.LHandTrigger) && currSelectedLObj != null)
+            {
+                maintainGrab(Hand.LEFT);
+            }
+            else if (OVRInput.GetUp(OVRInput.RawButton.LHandTrigger) && currSelectedLObj != null)
+            {
+                endGrab(Hand.LEFT);
+                castRay(Hand.LEFT);
+            }
+            else
+            {
+                castRay(Hand.LEFT);
+            }
+
+            if (OVRInput.GetUp(OVRInput.RawButton.A))
+            {
+                testObjects[0].transform.position = new Vector3(0f, 2f, 8f);
+                testObjects[1].transform.position = new Vector3(-3.78f, 2f, 6.16f);
+                testObjects[2].transform.position = new Vector3(4.06f, 2f, 6.16f);
+                for (int i = 0; i < testObjects.Length; i++)
+                {
+                    testObjects[i].transform.rotation = Quaternion.identity;
+                    testObjects[i].GetComponent<Rigidbody>().velocity = Vector3.zero;
+                }
+            }
+        }
+		else // hovering
+		{
+
+		}
+	} // end of Update()
 }
