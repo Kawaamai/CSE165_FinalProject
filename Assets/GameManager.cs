@@ -22,6 +22,7 @@ public class GameManager : MonoBehaviour {
 	public Transform hmd;
 	public CharacterController playerCharController;
 	public OVRPlayerController playerController; // may not need this
+	public ParticleSystem hoverEffect;
 
 	// movement
 	// Activate movement by:
@@ -34,12 +35,13 @@ public class GameManager : MonoBehaviour {
 	// Deactivate movement by doing one of the following:
 	// 1. Close hands
 	// 2. move hands above hoverHandHeightThresh
-	private float moveSpeed = 2.2f;
+	private float moveSpeed = 0.05f;
 	private float hoverHeight = 0.5f;
 	private bool isHovering = false;
-	private float hoverHandHeightThresh = 2f;
+	private float hoverHandHeightThresh = 1.9f;
 	private float hoverHandDeadzone = 0.15f;
 	private float hoverHandAngleThresh = 5f;
+	private MoveDir lastMoveDir;
 
 	// controller
 	public Transform[] controllers;
@@ -95,6 +97,7 @@ public class GameManager : MonoBehaviour {
 	void Start () {
 		Inst = this;
 		hoverHandHeightThresh = hmd.position.y - 0.6f;
+		hoverEffect.Stop();
 	}
 
 	private void castRay(Hand hand)
@@ -255,7 +258,8 @@ public class GameManager : MonoBehaviour {
 	{
 		Vector3 flatHmdForward = new Vector3(hmd.forward.x, 0f, hmd.forward.z);
 		flatHmdForward.Normalize();
-		Vector3 acutalHeadPos = hmd.position - (0.1f * flatHmdForward); // hmd position slightly infront head position
+		// TODO: hmd-head offset
+		Vector3 acutalHeadPos = hmd.position - (0.15f * flatHmdForward); // hmd position slightly infront head position
 		Vector3 rHandProj = Vector3.Project(controllers[(int)Hand.RIGHT].position - hmd.position, flatHmdForward);
 		Vector3 lHandProj = Vector3.Project(controllers[(int)Hand.LEFT].position - hmd.position, flatHmdForward);
 
@@ -266,18 +270,57 @@ public class GameManager : MonoBehaviour {
 	// move char to hoverheight above ground intersection
 	private void HoverMove(MoveDir dir)
 	{
-		if (dir == MoveDir.NONE)
-		{
-
-		}
-		else
+		if (dir != MoveDir.NONE)
 		{
 			Vector3 forwardDir = new Vector3(hmd.forward.x, 0f, hmd.forward.z);
+			forwardDir.Normalize();
 			if (dir == MoveDir.BACKWARD)
 				forwardDir *= -1;
 
-			// TODO:
+			playerCharController.Move(forwardDir * moveSpeed);
 		}
+	}
+
+	private MoveDir GetMoveDir()
+	{
+		Vector3 flatHmdForward = new Vector3(hmd.forward.x, 0f, hmd.forward.z);
+		flatHmdForward.Normalize();
+		// TODO: hmd-head offset
+		Vector3 acutalHeadPos = hmd.position - (0.15f * flatHmdForward); // hmd position slightly infront head position
+		Vector3 rHandProj = Vector3.Project(controllers[(int)Hand.RIGHT].position - hmd.position, flatHmdForward);
+		Vector3 lHandProj = Vector3.Project(controllers[(int)Hand.LEFT].position - hmd.position, flatHmdForward);
+
+		// if ((rHandProj.magnitude < hoverHandDeadzone) && (lHandProj.magnitude < hoverHandDeadzone))
+		// 	return MoveDir.NONE;
+
+		if (isBothHandsInDeadzone())
+		{
+			lastMoveDir = MoveDir.NONE;
+			return MoveDir.NONE;
+		}
+
+		if (lastMoveDir == MoveDir.NONE)
+		{
+            if (flatHmdForward == Vector3.Normalize(rHandProj) && flatHmdForward == Vector3.Normalize(lHandProj)) // if hands forwardish
+            {
+                if ((rHandProj.magnitude > hoverHandDeadzone) && (lHandProj.magnitude > hoverHandDeadzone))
+				{
+					lastMoveDir = MoveDir.BACKWARD;
+                    return MoveDir.BACKWARD;
+				}
+            }
+            else // hands backwardish
+            if (flatHmdForward == -1f * Vector3.Normalize(rHandProj) && flatHmdForward == -1 * Vector3.Normalize(lHandProj)) // if hands forwardish
+            {
+                if ((rHandProj.magnitude > hoverHandDeadzone) && (lHandProj.magnitude > hoverHandDeadzone))
+				{
+					lastMoveDir = MoveDir.FORWARD;
+                    return MoveDir.FORWARD;
+				}
+            }
+		}
+
+		return lastMoveDir;
 	}
 
 	// will need later for movement
@@ -378,22 +421,17 @@ public class GameManager : MonoBehaviour {
 	private void Update () {
 
 		hoverHandHeightThresh = hmd.position.y - 0.6f;
-		// Debug.Log(hoverHandHeightThresh);
-		// Debug.Log(controllers[1].position.y);
 		if (!OVRInput.Get(OVRInput.RawButton.RIndexTrigger) && !OVRInput.Get(OVRInput.RawButton.RHandTrigger) &&
 			!OVRInput.Get(OVRInput.RawButton.LIndexTrigger) && !OVRInput.Get(OVRInput.RawButton.LHandTrigger) &&
-			isBothHandsBelowHoverThresh()) // TODO: remove this false to get hovering
+			isBothHandsBelowHoverThresh())
 		{
 			if (isBothHandsInDeadzone())
 			{
 				isHovering = true;
 				// move charater up 0.5
 				playerController.GravityModifier = 0;
-                // float groundDist = getGroundHeight(playerCharController.transform.position);
-                // Debug.Log(groundDist);
-                // if (groundDist - playerCharController.height < hoverHeight)
-                //     playerCharController.Move(Vector3.up * 0.5f);
-				// TODO: fix the bounce/falling after moving up
+				hoverEffect.Play();
+				// TODO: make this more smooth
 				if (playerCharController.isGrounded)
                     playerCharController.Move(Vector3.up * 0.5f);
 			}
@@ -402,10 +440,12 @@ public class GameManager : MonoBehaviour {
 		{
             if (isHovering)
 			{
+				hoverEffect.Stop();
 				playerController.GravityModifier = 1;
                 if (!playerCharController.isGrounded)
-                    playerCharController.Move(Vector3.down * 0.5f);
+                    playerCharController.Move(Vector3.down * 10f);
 			}
+			lastMoveDir = MoveDir.NONE;
 			isHovering = false;
 		}
 
@@ -487,7 +527,9 @@ public class GameManager : MonoBehaviour {
         }
 		else // hovering
 		{
-
+			// find direction of travel
+			MoveDir dir = GetMoveDir();
+			HoverMove(dir);
 		}
 	} // end of Update()
 }
