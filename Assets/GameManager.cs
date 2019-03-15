@@ -382,7 +382,7 @@ public class GameManager : MonoBehaviour {
 		// Debug.Log(controllers[1].position.y);
 		if (!OVRInput.Get(OVRInput.RawButton.RIndexTrigger) && !OVRInput.Get(OVRInput.RawButton.RHandTrigger) &&
 			!OVRInput.Get(OVRInput.RawButton.LIndexTrigger) && !OVRInput.Get(OVRInput.RawButton.LHandTrigger) &&
-			isBothHandsBelowHoverThresh() && false) // TODO: remove this false to get hovering
+			isBothHandsBelowHoverThresh()) // TODO: remove this false to get hovering
 		{
 			if (isBothHandsInDeadzone())
 			{
