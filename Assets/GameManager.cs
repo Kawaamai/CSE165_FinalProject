@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour {
 	// 1. Close hands
 	// 2. move hands above hoverHandHeightThresh
 	private float moveSpeed = 0.05f;
-	private float hoverHeight = 0.5f;
+	private float hoverHeight = 0.2f;
 	private bool isHovering = false;
 	private float hoverHandHeightThresh = 1.9f;
 	private float hoverHandDeadzone = 0.15f;
@@ -93,11 +93,17 @@ public class GameManager : MonoBehaviour {
 	private float initLHandDistFromHmd;
 	private float startLChargeTime = 0f;
 
+	// Lightsaber
+	public Transform holster;
+	public Transform lightsaber;
+	private bool holdingLightsaber = false;
+
 	// Use this for initialization
 	void Start () {
 		Inst = this;
-		hoverHandHeightThresh = hmd.position.y - 0.6f;
+		hoverHandHeightThresh = CalcHoverHeightThresh();
 		hoverEffect.Stop();
+		unequiptLightsaber();
 	}
 
 	private void castRay(Hand hand)
@@ -254,12 +260,17 @@ public class GameManager : MonoBehaviour {
 		return (controllers[(int)Hand.RIGHT].position.y < hoverHandHeightThresh) && (controllers[(int)Hand.LEFT].position.y < hoverHandHeightThresh);
 	}
 
+	private Vector3 CalcActualHeadPos()
+	{
+		return hmd.position - (0.15f * Vector3.Normalize(hmd.forward));
+	}
+
 	private bool isBothHandsInDeadzone()
 	{
 		Vector3 flatHmdForward = new Vector3(hmd.forward.x, 0f, hmd.forward.z);
 		flatHmdForward.Normalize();
 		// TODO: hmd-head offset
-		Vector3 acutalHeadPos = hmd.position - (0.15f * flatHmdForward); // hmd position slightly infront head position
+		Vector3 acutalHeadPos = CalcActualHeadPos();
 		Vector3 rHandProj = Vector3.Project(controllers[(int)Hand.RIGHT].position - hmd.position, flatHmdForward);
 		Vector3 lHandProj = Vector3.Project(controllers[(int)Hand.LEFT].position - hmd.position, flatHmdForward);
 
@@ -286,7 +297,7 @@ public class GameManager : MonoBehaviour {
 		Vector3 flatHmdForward = new Vector3(hmd.forward.x, 0f, hmd.forward.z);
 		flatHmdForward.Normalize();
 		// TODO: hmd-head offset
-		Vector3 acutalHeadPos = hmd.position - (0.15f * flatHmdForward); // hmd position slightly infront head position
+		Vector3 acutalHeadPos = CalcActualHeadPos(); 
 		Vector3 rHandProj = Vector3.Project(controllers[(int)Hand.RIGHT].position - hmd.position, flatHmdForward);
 		Vector3 lHandProj = Vector3.Project(controllers[(int)Hand.LEFT].position - hmd.position, flatHmdForward);
 
@@ -331,8 +342,7 @@ public class GameManager : MonoBehaviour {
 
 		if (Physics.Raycast(ray, out hit, 1000f))
 		{
-			if (hit.collider.tag == "Ground")
-				return hit.distance;
+            return hit.distance;
 		}
 
 		return 1000f;
@@ -416,11 +426,63 @@ public class GameManager : MonoBehaviour {
 			}
 		}
 	}
+
+	private float CalcHoverHeightThresh()
+	{
+		return hmd.position.y - 0.6f;
+	}
+
+	private Quaternion GetAverageControllerRoll()
+	{
+		// Quaternion rHandRoll = Quaternion.FromToRotation(controllers[(int)Hand.RIGHT].transform.forward, Vector3.forward) * controllers[(int)Hand.RIGHT].rotation;
+		// Quaternion lHandRoll = Quaternion.FromToRotation(controllers[(int)Hand.LEFT].transform.forward, Vector3.forward) * controllers[(int)Hand.LEFT].rotation;
+		Quaternion rHandRoll = Quaternion.FromToRotation(controllers[(int)Hand.RIGHT].transform.forward, hmd.forward) * controllers[(int)Hand.RIGHT].rotation;
+		Quaternion lHandRoll = Quaternion.FromToRotation(controllers[(int)Hand.LEFT].transform.forward, hmd.forward) * controllers[(int)Hand.LEFT].rotation;
+		return Quaternion.Lerp(rHandRoll, lHandRoll, 0.5f);
+	}
+
+	private void HoverRotate(MoveDir dir)
+	{
+		Quaternion roll = GetAverageControllerRoll();
+		float controllerRoll = roll.eulerAngles.z;
+		controllerRoll = (controllerRoll > 180) ? controllerRoll - 360 : controllerRoll;
+		if (controllerRoll > -5f && controllerRoll < 5f)
+			return;
+		Quaternion rotation = Quaternion.Euler(0f, -controllerRoll, 0f);
+		// if (controllerRoll < 5f || controllerRoll > 355f)
+		// 	return;
+		rotation = Quaternion.Lerp(Quaternion.identity, rotation, 0.005f);
+		playerCharController.transform.rotation = playerCharController.transform.rotation * rotation;
+	}
+
+	private bool inHolsterRange()
+	{
+		Debug.Log(Vector3.Distance(controllers[(int)Hand.RIGHT].position, holster.position));
+		if (Vector3.Distance(controllers[(int)Hand.RIGHT].position, holster.position) < 0.2f)
+			return true;
+		return false;
+	}
+
+	private void equiptLightsaber()
+	{
+		lightsaber.parent = controllers[(int)Hand.RIGHT];
+		lightsaber.localPosition = new Vector3(0.01f, 0.1f, 0.02f);
+		lightsaber.localRotation = Quaternion.Euler(15f, 0f, 0f);
+		holdingLightsaber = true;
+	}
+
+	private void unequiptLightsaber()
+	{
+		lightsaber.parent = holster;
+		lightsaber.localPosition = Vector3.zero;
+		lightsaber.localRotation = Quaternion.identity;
+		holdingLightsaber = false;
+	}
 	
 	// Update is called once per frame
 	private void Update () {
 
-		hoverHandHeightThresh = hmd.position.y - 0.6f;
+		hoverHandHeightThresh = CalcHoverHeightThresh();
 		if (!OVRInput.Get(OVRInput.RawButton.RIndexTrigger) && !OVRInput.Get(OVRInput.RawButton.RHandTrigger) &&
 			!OVRInput.Get(OVRInput.RawButton.LIndexTrigger) && !OVRInput.Get(OVRInput.RawButton.LHandTrigger) &&
 			isBothHandsBelowHoverThresh())
@@ -428,12 +490,17 @@ public class GameManager : MonoBehaviour {
 			if (isBothHandsInDeadzone())
 			{
 				isHovering = true;
-				// move charater up 0.5
-				playerController.GravityModifier = 0;
 				hoverEffect.Play();
 				// TODO: make this more smooth
-				if (playerCharController.isGrounded)
-                    playerCharController.Move(Vector3.up * 0.5f);
+				float groundHeight = getGroundHeight(playerCharController.transform.position);
+				if (playerCharController.isGrounded || groundHeight - playerCharController.height < hoverHeight)
+				{
+                    playerCharController.Move(Vector3.up * 0.05f);
+				}
+				else if (groundHeight == 1000f) // walked off edge. fly!
+				{
+                    playerCharController.Move(Vector3.up * 0.1f);
+				}
 			}
 		}
 		else
@@ -441,19 +508,29 @@ public class GameManager : MonoBehaviour {
             if (isHovering)
 			{
 				hoverEffect.Stop();
-				playerController.GravityModifier = 1;
-                if (!playerCharController.isGrounded)
-                    playerCharController.Move(Vector3.down * 10f);
 			}
-			lastMoveDir = MoveDir.NONE;
+			playerCharController.Move(Vector3.down * .05f);
+            lastMoveDir = MoveDir.NONE;
 			isHovering = false;
 		}
 
 		if (!isHovering)
 		{
-            if (OVRInput.GetDown(OVRInput.RawButton.RHandTrigger) && currRHandObservedObj != null)
+            if (OVRInput.GetDown(OVRInput.RawButton.RHandTrigger))
             {
-                initializeGrab(Hand.RIGHT);
+				// TODO:
+				if (inHolsterRange())
+				{
+					Debug.Log(holdingLightsaber);
+					if (!holdingLightsaber)
+						equiptLightsaber();
+					else
+						unequiptLightsaber();
+				}
+				else if (currRHandObservedObj != null)
+				{
+                    initializeGrab(Hand.RIGHT);
+                }
             }
             else if (OVRInput.Get(OVRInput.RawButton.RHandTrigger) && currSelectedRObj != null)
             {
@@ -530,6 +607,7 @@ public class GameManager : MonoBehaviour {
 			// find direction of travel
 			MoveDir dir = GetMoveDir();
 			HoverMove(dir);
+			HoverRotate(dir);
 		}
 	} // end of Update()
 }
