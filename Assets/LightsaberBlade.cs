@@ -27,4 +27,14 @@ public class LightsaberBlade : MonoBehaviour {
 		}
 		lr.sharedMaterials[1].SetTextureOffset("_MainTex", new Vector2(textureOffset, 0f));
 	}
+
+	public void ExtendBlade()
+	{
+		lr.enabled = true;
+	}
+
+	public void RetractBlade()
+	{
+		lr.enabled = false;
+	}
 }
