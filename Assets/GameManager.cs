@@ -7,6 +7,8 @@ public class GameManager : MonoBehaviour {
 	public bool debugEnabled = false;
 	public Transform DebugHead;
 	public Transform DebugHeight;
+	public LineRenderer rightIndicator;
+	public LineRenderer leftIndicator;
 	public enum Hand
 	{
 		LEFT = 0,
@@ -106,6 +108,8 @@ public class GameManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		rightIndicator.enabled = false;
+		leftIndicator.enabled = false;
 		Inst = this;
 		hoverHandHeightThresh = CalcHoverHeightThresh();
 		hoverEffect.Stop();
@@ -127,7 +131,8 @@ public class GameManager : MonoBehaviour {
 		{
 			float dist = Vector3.Cross(ray.direction, objs[i].transform.position - ray.origin).magnitude;
 			// if (dist < min && dist < (Mathf.Sin(15f * Mathf.Deg2Rad) * Vector3.Distance(objs[i].transform.position, hmd.position)))
-			if (dist < min && dist < (Mathf.Sin(15f * Mathf.Deg2Rad) * Vector3.Distance(objs[i].transform.position, actualHeadPos)))
+			if (dist < min && dist < (Mathf.Sin(15f * Mathf.Deg2Rad) * Vector3.Distance(objs[i].transform.position, actualHeadPos))
+				&& Vector3.Distance(objs[i].transform.position, controllers[controller].position) < 30f)
 			{
 				min = dist;
 				idx = i;
@@ -459,7 +464,9 @@ public class GameManager : MonoBehaviour {
 			{
 				Vector3 direction = objs[i].transform.position - controllers[controller].position;
 				direction.Normalize();
-				objs[i].GetComponent<Rigidbody>().AddForce(direction * (1000f + (chargeTime * 1000f)));
+				float magnitude = 10000f + (chargeTime * 10000f);
+				float distance = Vector3.Distance(objs[i].transform.position, hmd.position);
+				objs[i].GetComponent<Rigidbody>().AddForce(direction * magnitude * (4/(distance*distance)));
 			}
 		}
 	}
@@ -626,26 +633,56 @@ public class GameManager : MonoBehaviour {
 			if(OVRInput.GetDown(OVRInput.RawButton.RIndexTrigger))
 			{
 				chargePush(Hand.RIGHT);
+				rightIndicator.enabled = true;
+			}
+			else if (OVRInput.Get(OVRInput.RawButton.RIndexTrigger) && currSelectedRObj == null)
+			{
+				rightIndicator.SetPosition(0, controllers[1].position);
+				float indicatorLength = Mathf.Min(10f, (Time.time - startRChargeTime) * 5f);
+				rightIndicator.SetPosition(1, controllers[1].position + controllers[1].forward * indicatorLength);
+			}
+			else if (OVRInput.Get(OVRInput.RawButton.RIndexTrigger) && currSelectedRObj != null)
+			{
+				rightIndicator.SetPosition(0, currSelectedRObj.transform.position);
+				float indicatorLength = Mathf.Min(10f, (Time.time - startRChargeTime) * 5f);
+				rightIndicator.SetPosition(1, currSelectedRObj.transform.position + controllers[1].forward * indicatorLength);
 			}
 			else if (OVRInput.GetUp(OVRInput.RawButton.RIndexTrigger) && currSelectedRObj != null)
 			{
+				rightIndicator.enabled = false;
 				releasePushWithObj(Hand.RIGHT);
 			}
 			else if (OVRInput.GetUp(OVRInput.RawButton.RIndexTrigger) && currSelectedRObj == null)
 			{
+				rightIndicator.enabled = false;
 				releasePushWithoutObj(Hand.RIGHT);
 			}
 
 			if(OVRInput.GetDown(OVRInput.RawButton.LIndexTrigger))
 			{
 				chargePush(Hand.LEFT);
+				leftIndicator.enabled = true;
+			}
+			else if (OVRInput.Get(OVRInput.RawButton.LIndexTrigger) && currSelectedLObj == null)
+			{
+				leftIndicator.SetPosition(0, controllers[0].position);
+				float indicatorLength = Mathf.Min(10f, (Time.time - startRChargeTime) * 5f);
+				leftIndicator.SetPosition(1, controllers[0].position + controllers[0].forward * indicatorLength);
+			}
+			else if (OVRInput.Get(OVRInput.RawButton.LIndexTrigger) && currSelectedLObj != null)
+			{
+				leftIndicator.SetPosition(0, currSelectedLObj.transform.position);
+				float indicatorLength = Mathf.Min(10f, (Time.time - startRChargeTime) * 5f);
+				leftIndicator.SetPosition(1, currSelectedLObj.transform.position + controllers[0].forward * indicatorLength);
 			}
 			else if (OVRInput.GetUp(OVRInput.RawButton.LIndexTrigger) && CurrSelectedLObj != null)
 			{
+				leftIndicator.enabled = false;
 				releasePushWithObj(Hand.LEFT);
 			}
 			else if (OVRInput.GetUp(OVRInput.RawButton.LIndexTrigger) && currSelectedLObj == null)
 			{
+				leftIndicator.enabled = false;
 				releasePushWithoutObj(Hand.LEFT);
 			}
 
