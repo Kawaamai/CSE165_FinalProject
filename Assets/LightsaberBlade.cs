@@ -41,6 +41,10 @@ public class LightsaberBlade : MonoBehaviour {
 	public void ExtendBlade()
 	{
 		lr.enabled = true;
+		if(GetComponent<Collider>() != null)
+		{
+			GetComponent<Collider>().enabled = true;
+		}
 	}
 
 	public void RetractBlade()
@@ -48,5 +52,9 @@ public class LightsaberBlade : MonoBehaviour {
 		lr.enabled = false;
 		bladeExtendLerp = 0f;
 		endPos.position = startPos.position;
+		if (GetComponent<Collider>() != null)
+		{
+			GetComponent<Collider>().enabled = false;
+		}
 	}
 }

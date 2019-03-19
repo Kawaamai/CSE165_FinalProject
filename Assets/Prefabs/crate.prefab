@@ -21,7 +21,7 @@ GameObject:
   - component: {fileID: 4007975206005422}
   - component: {fileID: 33029398121073112}
   - component: {fileID: 23235259352192744}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: crate_lid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -38,7 +38,7 @@ GameObject:
   - component: {fileID: 4205263117467282}
   - component: {fileID: 33855259056402898}
   - component: {fileID: 23758113382333084}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: crate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -56,9 +56,9 @@ GameObject:
   - component: {fileID: 33059452448631566}
   - component: {fileID: 23942825227614836}
   - component: {fileID: 65332794442904360}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube
-  m_TagString: Untagged
+  m_TagString: crate
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -74,9 +74,11 @@ GameObject:
   - component: {fileID: 65279966244349052}
   - component: {fileID: 54244411063993690}
   - component: {fileID: 114979109993279836}
-  m_Layer: 0
+  - component: {fileID: 114799278423368220}
+  - component: {fileID: 114485462900385022}
+  m_Layer: 10
   m_Name: crate
-  m_TagString: Untagged
+  m_TagString: crate
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -126,8 +128,8 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1961380606393908}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: 8}
+  m_LocalRotation: {x: 0, y: -0.38268343, z: 0, w: 0.92387956}
+  m_LocalPosition: {x: -10.63, y: 2, z: -20.54}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4205263117467282}
@@ -135,7 +137,7 @@ Transform:
   - {fileID: 4694726192924170}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -45, z: 0}
 --- !u!23 &23235259352192744
 MeshRenderer:
   m_ObjectHideFlags: 1
@@ -301,6 +303,30 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &114485462900385022
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1961380606393908}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8c5b012eb358de44bf6ec8d94e7808f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CuttableObjectPrefab: {fileID: 0}
+--- !u!114 &114799278423368220
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1961380606393908}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8c5b012eb358de44bf6ec8d94e7808f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CuttableObjectPrefab: {fileID: 0}
 --- !u!114 &114979109993279836
 MonoBehaviour:
   m_ObjectHideFlags: 1

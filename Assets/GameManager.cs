@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour {
 	public Transform DebugHeight;
 	public LineRenderer rightIndicator;
 	public LineRenderer leftIndicator;
+	public Transform ai;
 	public enum Hand
 	{
 		LEFT = 0,
@@ -282,7 +283,7 @@ public class GameManager : MonoBehaviour {
 		return (controllers[(int)Hand.RIGHT].position.y < hoverHandHeightThresh) && (controllers[(int)Hand.LEFT].position.y < hoverHandHeightThresh);
 	}
 
-	private Vector3 CalcActualHeadPos()
+	public Vector3 CalcActualHeadPos()
 	{
 		return hmd.position - (0.13f * Vector3.Normalize(hmd.forward));
 	}
@@ -666,7 +667,7 @@ public class GameManager : MonoBehaviour {
 			else if (OVRInput.Get(OVRInput.RawButton.LIndexTrigger) && currSelectedLObj == null)
 			{
 				leftIndicator.SetPosition(0, controllers[0].position);
-				float indicatorLength = Mathf.Min(10f, (Time.time - startRChargeTime) * 5f);
+				float indicatorLength = Mathf.Min(10f, (Time.time - startLChargeTime) * 5f);
 				leftIndicator.SetPosition(1, controllers[0].position + controllers[0].forward * indicatorLength);
 			}
 			else if (OVRInput.Get(OVRInput.RawButton.LIndexTrigger) && currSelectedLObj != null)
@@ -707,4 +708,9 @@ public class GameManager : MonoBehaviour {
 			HoverRotate();
 		}
 	} // end of Update()
+
+	public void EndGame()
+	{
+
+	}
 }
