@@ -32,13 +32,15 @@ Holding with cone pointer. Can also throw objects.
 
 
 ### Updates (3/18/19)
-Selection: Done - Non-standard method, hybrid between cone selection and raycasting, but from headset toward controller
-Manipulation: Done
-Travel: Done - Non-standard method, move holding hands at sides to levitate and point them to move
-System Control: Done - Lightsaber can be grabbed from toolbelt and used as a melee weapon
-Symbolic Input: Pending?  We're still looking at letting the user change the lightsaber color
-Interactive Tutorial: In progress.  Prompts have been added to game world, but they still need to be made interactive.
-Spatial Audio: Abandoned.
+- Selection: Done - Non-standard method, hybrid between cone selection and raycasting, but from headset toward controller
+- Manipulation: Done
+- Travel: Done - Non-standard method, move holding hands at sides to levitate and point them to move
+- System Control: Done - Lightsaber can be grabbed from toolbelt and used as a melee weapon
+- Symbolic Input: Pending?  We're still looking at letting the user change the lightsaber color
+- Interactive Tutorial: In progress.  Prompts have been added to game world, but they still need to be made interactive.
+- Spatial Audio: Abandoned.
 
 
 We've created an arena using free Asset Store assets, complete with turrets shooting at an AI running around the map randomly.  The user will have to destroy all turrets by throwing boxes at them with the Force or by hitting them with their lightsaber.
+
+![Holding1](Screenshot%20(17).png)
