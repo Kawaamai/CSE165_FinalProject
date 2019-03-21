@@ -15,6 +15,8 @@ public class TurretBehavior : MonoBehaviour {
 	public GameObject explosion;
 	public static int remaining = 7;
 	public Text counter;
+	public static GameObject[] deactivatedTurrets = new GameObject[7];
+	public static int deactivatedArrayHead = 0;
 
 	// Use this for initialization
 	void Start () {
@@ -33,6 +35,8 @@ public class TurretBehavior : MonoBehaviour {
 
 	public void Explode()
 	{
+		deactivatedTurrets[deactivatedArrayHead] = transform.parent.gameObject;
+		deactivatedArrayHead++;
 		GameObject explode = Instantiate(explosion);
 		explode.transform.position = transform.position;
 		explode.transform.localScale = new Vector3(2f, 2f, 2f);
