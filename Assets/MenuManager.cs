@@ -9,6 +9,7 @@ public class MenuManager : MonoBehaviour {
     public Text RGBTextR;
     public Text RGBTextG;
     public Text RGBTextB;
+    public Text ResetText;
     public LineRenderer lightsaber;
 
 	public Transform[] controllers; // only has the right hand
@@ -53,6 +54,10 @@ public class MenuManager : MonoBehaviour {
                                 GameManager.Inst.isHumanJoystick = true;
                                 t.text = "Movement:\nHuman Joystick";
                             }
+                        }
+                        else if (t.gameObject.name == "Reset")
+                        {
+                            // TODO:
                         }
                     }
                     if (t.gameObject.name == "RGBTextR" || t.gameObject.name == "RGBTextG" || t.gameObject.name == "RGBTextB")
@@ -132,6 +137,9 @@ public class MenuManager : MonoBehaviour {
             case "RGBTextB":
                 t.color = Color.blue;
                 break;
+            case "Reset":
+                t.color = Color.yellow;
+                break;
         }
     }
 
@@ -145,7 +153,10 @@ public class MenuManager : MonoBehaviour {
 
     private void unhighlightText(Text t)
     {
-        t.color = Color.black;
+        if (t.gameObject.name == "Reset")
+            t.color = Color.white;
+        else
+            t.color = Color.black;
     }
 
     private void OutputLightsaberColor()

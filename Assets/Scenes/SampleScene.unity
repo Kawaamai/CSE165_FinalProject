@@ -658,6 +658,7 @@ MonoBehaviour:
   RGBTextR: {fileID: 915657804}
   RGBTextG: {fileID: 616389509}
   RGBTextB: {fileID: 874631206}
+  ResetText: {fileID: 0}
   lightsaber: {fileID: 1081842752}
   controllers:
   - {fileID: 551537075}
@@ -6443,7 +6444,7 @@ ParticleSystemRenderer:
   m_ReflectionProbeUsage: 0
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 10301, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 68a5589e5cf4e4063b676e2033ef22a4, type: 2}
   - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
@@ -7107,15 +7108,15 @@ ParticleSystem:
   ShapeModule:
     serializedVersion: 5
     enabled: 1
-    type: 10
+    type: 12
     angle: 25
     length: 5
     boxThickness: {x: 0, y: 0, z: 0}
     radiusThickness: 1
     donutRadius: 0.2
     m_Position: {x: 0, y: -0.7, z: 0}
-    m_Rotation: {x: 90, y: 0, z: 0}
-    m_Scale: {x: 1, y: 1, z: 1}
+    m_Rotation: {x: 0, y: 0, z: -90}
+    m_Scale: {x: 0, y: 1, z: 1}
     placementMode: 0
     m_MeshMaterialIndex: 0
     m_MeshNormalOffset: 0
@@ -10207,7 +10208,7 @@ ParticleSystem:
     maxLights: 20
   TrailModule:
     enabled: 0
-    mode: 0
+    mode: 1
     ratio: 1
     lifetime:
       serializedVersion: 2
@@ -16364,7 +16365,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -17354,7 +17355,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -17363,7 +17364,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 36
+    m_FontSize: 30
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 3

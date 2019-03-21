@@ -118,7 +118,7 @@ public class GameManager : MonoBehaviour {
 	private bool holdingLightsaber = false;
 
     // human joystick
-    public bool isHumanJoystick = true;
+    public bool isHumanJoystick = false;
     private bool initBaseHeadPosSet = false;
     private Vector3 baseHeadPosition;
 
@@ -132,7 +132,7 @@ public class GameManager : MonoBehaviour {
 		unequiptLightsaber();
 		DebugHead.gameObject.SetActive(debugEnabled);
 		DebugHeight.gameObject.SetActive(debugEnabled);
-        isHumanJoystick = true;
+        isHumanJoystick = false;
 	}
 
 	private void castRay(Hand hand)
@@ -581,7 +581,7 @@ public class GameManager : MonoBehaviour {
     
     private bool isHumanJoystickOverThresh()
     {
-        return GetHeadBaseOffset().sqrMagnitude > 0.02f;
+        return GetHeadBaseOffset().sqrMagnitude > 0.03f;
     }
 
     private Vector3 getHumanJoystickMoveDir()
