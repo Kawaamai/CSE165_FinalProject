@@ -9,7 +9,7 @@ public class TurretBehavior : MonoBehaviour {
 	private LineRenderer laser;
 	private float startFireTime;
 	private float timeToWait;
-	private float timeLastFired;
+	public float timeLastFired;
 	private float aimSpread = 1f;
 	private Vector3 beamEnd;
 	public GameObject explosion;
@@ -31,24 +31,31 @@ public class TurretBehavior : MonoBehaviour {
 		laser.enabled = true;
 		beamEnd = Quaternion.Euler(Random.Range(-1f * aimSpread, aimSpread), Random.Range(-1f * aimSpread, aimSpread), Random.Range(-1f * aimSpread, aimSpread)) *
 					(transform.GetChild(1).position + transform.GetChild(1).forward * 100f);
+        if (GetComponentInParent<AudioSource>() != null)
+        {
+            GetComponentInParent<AudioSource>().Play();
+        }
 	}
 
 	public void Explode()
 	{
-		deactivatedTurrets[deactivatedArrayHead] = transform.parent.gameObject;
-		deactivatedArrayHead++;
-		GameObject explode = Instantiate(explosion);
-		explode.transform.position = transform.position;
-		explode.transform.localScale = new Vector3(2f, 2f, 2f);
-		remaining -= 1;
-		transform.parent.gameObject.SetActive(false);
+        if (transform.parent.gameObject.activeInHierarchy)
+        {
+            deactivatedTurrets[deactivatedArrayHead] = transform.parent.gameObject;
+            deactivatedArrayHead++;
+            GameObject explode = Instantiate(explosion);
+            explode.transform.position = transform.position;
+            explode.transform.localScale = new Vector3(2f, 2f, 2f);
+            remaining -= 1;
+            transform.parent.gameObject.SetActive(false);
+        }
 	}
 
-	void OnCollisionEnter(Collision col)
+	private void OnCollisionEnter(Collision col)
 	{
 		if (col.gameObject.tag == "lightsaber" || (col.gameObject.tag == "crate" && GameManager.Inst.hmd.position.z > -40.76f))
 		{
-			Explode();
+            Explode();
 		}
 	}
 

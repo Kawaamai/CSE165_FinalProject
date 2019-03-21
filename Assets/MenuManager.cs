@@ -59,7 +59,7 @@ public class MenuManager : MonoBehaviour {
                         else if (t.gameObject.name == "Reset")
                         {
                             // TODO:
-                            Debug.Log("soemra;lkjsdf;lk");
+                            t.color = Color.green;
                             GameManager.Inst.Reset();
                         }
                     }

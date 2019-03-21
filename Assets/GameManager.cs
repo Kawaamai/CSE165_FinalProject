@@ -883,7 +883,8 @@ public class GameManager : MonoBehaviour {
 			turrets[i].SetActive(true);
 		}
 		TurretBehavior.deactivatedArrayHead = 0;
-		ai.GetComponent<AIBehavior>().Reset();
+        TurretBehavior.remaining = 7;
+        ai.GetComponent<AIBehavior>().Reset();
 	}
 
 	public void ContinueTutorial()
