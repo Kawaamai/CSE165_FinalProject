@@ -23,15 +23,6 @@ public class Cuttable : MonoBehaviour {
         //     Debug.DrawRay(contact.point, contact.normal, Color.white);
 		// 	Debug.Log("butts");
         // }
-		Collider c = collision.collider;
-		if (c.tag == "lightsaber")
-		{
-			Debug.Log("lightbutt");
-			Debug.Log(collision.relativeVelocity);
-			Debug.Log(collision.contacts.Length); // usually 1, sometimes 2
-			ContactPoint contact = collision.contacts[0];
-			Debug.Log(contact.point - transform.position);
-		}
     }
 
 	private void Split()

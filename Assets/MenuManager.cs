@@ -58,6 +58,8 @@ public class MenuManager : MonoBehaviour {
                         else if (t.gameObject.name == "Reset")
                         {
                             // TODO:
+                            Debug.Log("soemra;lkjsdf;lk");
+                            GameManager.Inst.Reset();
                         }
                     }
                     if (t.gameObject.name == "RGBTextR" || t.gameObject.name == "RGBTextG" || t.gameObject.name == "RGBTextB")
@@ -106,6 +108,7 @@ public class MenuManager : MonoBehaviour {
                 else
                 {
                     unhighlightText(movementText);
+                    unhighlightText(ResetText);
                     unhighlightText(RGBTextR);
                     unhighlightText(RGBTextG);
                     unhighlightText(RGBTextB);
@@ -114,6 +117,7 @@ public class MenuManager : MonoBehaviour {
             else
             {
                 unhighlightText(movementText);
+                unhighlightText(ResetText);
                 unhighlightText(RGBTextR);
                 unhighlightText(RGBTextG);
                 unhighlightText(RGBTextB);

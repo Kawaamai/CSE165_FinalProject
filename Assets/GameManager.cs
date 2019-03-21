@@ -51,7 +51,7 @@ public class GameManager : MonoBehaviour {
 	// Deactivate movement by doing one of the following:
 	// 1. Close hands
 	// 2. move hands above hoverHandHeightThresh
-	private float moveSpeed = 0.05f;
+	private float moveSpeed = 2f;
 	private float hoverHeight = 0.02f;
 	private bool isHovering = false;
 	private float hoverHandHeightThresh = 1.9f;
@@ -329,7 +329,7 @@ public class GameManager : MonoBehaviour {
 			if (dir == MoveDir.BACKWARD)
 				forwardDir *= -1;
 
-			playerCharController.Move(forwardDir * moveSpeed);
+			playerCharController.Move(forwardDir * moveSpeed * Time.deltaTime);
 		}
 	}
 
@@ -347,7 +347,7 @@ public class GameManager : MonoBehaviour {
             forwardDir.Normalize();
 			// Debug.Log(forwardDir);
 			// Debug.Log(Vector3.Normalize(new Vector3(hmd.forward.x, 0f, hmd.forward.z)));
-            playerCharController.Move(forwardDir * moveSpeed);
+            playerCharController.Move(forwardDir * moveSpeed * Time.deltaTime);
 		}
 	}
 
@@ -398,7 +398,7 @@ public class GameManager : MonoBehaviour {
         if (isHumanJoystickOverThresh())
         {
             Vector3 dir = getHumanJoystickMoveDir();
-            playerCharController.Move(dir * moveSpeed);
+            playerCharController.Move(dir * moveSpeed * Time.deltaTime);
         }
     }
 
@@ -632,11 +632,11 @@ public class GameManager : MonoBehaviour {
                     float groundHeight = getGroundHeight(playerCharController.transform.position);
                     if (playerCharController.isGrounded || groundHeight - playerCharController.height < hoverHeight)
                     {
-                        playerCharController.Move(Vector3.up * 0.008f);
+                        playerCharController.Move(Vector3.up * Time.deltaTime);
                     }
                     else if (groundHeight == 1000f) // walked off edge. fly!
                     {
-                        playerCharController.Move(Vector3.up * 0.1f);
+                        playerCharController.Move(Vector3.up * Time.deltaTime);
                     }
                 }
             }
@@ -646,7 +646,7 @@ public class GameManager : MonoBehaviour {
                 {
                     hoverEffect.Stop();
                 }
-                playerCharController.Move(Vector3.down * 0.02f);
+                playerCharController.Move(Vector3.down * Time.deltaTime);
                 lastMoveDir = MoveDir.NONE;
                 isHovering = false;
             }
@@ -672,11 +672,11 @@ public class GameManager : MonoBehaviour {
                 float groundHeight = getGroundHeight(playerCharController.transform.position);
                 if (playerCharController.isGrounded || groundHeight - playerCharController.height < hoverHeight)
                 {
-                    playerCharController.Move(Vector3.up * 0.008f);
+                    playerCharController.Move(Vector3.up * Time.deltaTime);
                 }
                 else if (groundHeight == 1000f) // walked off edge. fly!
                 {
-                    playerCharController.Move(Vector3.up * 0.04f);
+                    playerCharController.Move(Vector3.up * Time.deltaTime);
                 }
             }
             else
@@ -685,7 +685,7 @@ public class GameManager : MonoBehaviour {
                 {
                     hoverEffect.Stop();
                 }
-                playerCharController.Move(Vector3.down * 0.02f);
+                playerCharController.Move(Vector3.down * Time.deltaTime);
                 lastMoveDir = MoveDir.NONE;
                 isHovering = false;
             }

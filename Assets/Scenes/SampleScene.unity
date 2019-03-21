@@ -658,7 +658,7 @@ MonoBehaviour:
   RGBTextR: {fileID: 915657804}
   RGBTextG: {fileID: 616389509}
   RGBTextB: {fileID: 874631206}
-  ResetText: {fileID: 0}
+  ResetText: {fileID: 1969204815}
   lightsaber: {fileID: 1081842752}
   controllers:
   - {fileID: 551537075}
