@@ -21,6 +21,7 @@ public class LightsaberBlade : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+
 		lr.SetPosition(0, startPos.position);
 
 		textureOffset -= Time.deltaTime*2f;
@@ -40,6 +41,10 @@ public class LightsaberBlade : MonoBehaviour {
 
 	public void ExtendBlade()
 	{
+		if(GetComponent<AudioSource>() != null)
+		{
+			GetComponent<AudioSource>().Play();
+		}
 		lr.enabled = true;
 		if(GetComponent<Collider>() != null)
 		{
@@ -49,6 +54,10 @@ public class LightsaberBlade : MonoBehaviour {
 
 	public void RetractBlade()
 	{
+		if (GetComponent<AudioSource>() != null)
+		{
+			GetComponent<AudioSource>().Stop();
+		}
 		lr.enabled = false;
 		bladeExtendLerp = 0f;
 		endPos.position = startPos.position;

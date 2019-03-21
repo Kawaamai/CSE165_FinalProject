@@ -10,6 +10,7 @@ public class AIBehavior : MonoBehaviour {
 	private bool hasDest;
 	private NavMeshAgent nmagent;
 	private float health = 100f;
+	public GameObject healthBar;
 
 	// Use this for initialization
 	void Start () {
@@ -20,11 +21,16 @@ public class AIBehavior : MonoBehaviour {
 
 	public void TakeDamage()
 	{
-		health -= 0.1f;
+		health -= Mathf.Min(health, 10f);
+		healthBar.transform.localScale = new Vector3(health / 100f, 1f, 1f);
 		//Debug.LogError("AI TOOK DAMAGE");
-		if(health <= 0f)
+		if (health <= 0f)
 		{
+			health = 0f;
+			Destroy(nmagent);
+			anim.SetBool("isDead", true);
 			GameManager.Inst.EndGame();
+			GetComponent<Rigidbody>().velocity = Vector3.zero;
 		}
 	}
 	
@@ -44,8 +50,11 @@ public class AIBehavior : MonoBehaviour {
 
 			anim.SetBool("isIdle", false);
 			anim.SetBool("isRunning", true);
-			nmagent.SetDestination(new Vector3(currDest.x, transform.position.y, currDest.y));
-			if(Vector3.Distance(transform.position, new Vector3(currDest.x, 0f, currDest.y)) < 2f)
+			if(GetComponent<NavMeshAgent>() != null)
+			{
+				nmagent.SetDestination(new Vector3(currDest.x, transform.position.y, currDest.y));
+			}
+			if (Vector3.Distance(transform.position, new Vector3(currDest.x, 0f, currDest.y)) < 2f)
 			{
 				hasDest = false;
 				anim.SetBool("isIdle", true);

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TurretBehavior : MonoBehaviour {
 
@@ -9,9 +10,11 @@ public class TurretBehavior : MonoBehaviour {
 	private float startFireTime;
 	private float timeToWait;
 	private float timeLastFired;
-	private float aimSpread = 3f;
+	private float aimSpread = 1f;
 	private Vector3 beamEnd;
 	public GameObject explosion;
+	public static int remaining = 7;
+	public Text counter;
 
 	// Use this for initialization
 	void Start () {
@@ -33,6 +36,7 @@ public class TurretBehavior : MonoBehaviour {
 		GameObject explode = Instantiate(explosion);
 		explode.transform.position = transform.position;
 		explode.transform.localScale = new Vector3(2f, 2f, 2f);
+		remaining -= 1;
 		Destroy(transform.parent.gameObject);
 	}
 
@@ -54,7 +58,7 @@ public class TurretBehavior : MonoBehaviour {
 			Vector3 euler = rot.eulerAngles;
 			euler.x = 0f;
 			euler.z = 0f;
-			transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.Euler(euler), 10f * Time.deltaTime);
+			transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.Euler(euler), 100f * Time.deltaTime);
 			if(Time.time - timeLastFired > timeToWait)
 			{
 				Fire();

@@ -1,8 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour {
+
+	//Tutorial shit
+	private bool tutorialMode = true;
+	public GameObject panel1;
+	public GameObject panel2;
+	public GameObject panel3;
+	public GameObject panel4;
+	public GameObject scoreboard;
+	public GameObject tutorialBox;
 
 	public bool debugEnabled = false;
 	public Transform DebugHead;
@@ -232,9 +242,9 @@ public class GameManager : MonoBehaviour {
 		else if (movementAmt <= -0.1f)
 			movementAmt += 0.1f;
 		if (controller == 1)
-			rHandObjDist = rHandObjDist + movementAmt * 15f * Time.deltaTime;
+			rHandObjDist = rHandObjDist + movementAmt * 30f * Time.deltaTime;
 		else
-			lHandObjDist = lHandObjDist + movementAmt * 15f * Time.deltaTime;
+			lHandObjDist = lHandObjDist + movementAmt * 30f * Time.deltaTime;
 		Vector3 newPos = Vector3.zero;
 		if (controller == 1)
 			newPos = controllers[controller].position + direction * rHandObjDist;
@@ -543,6 +553,11 @@ public class GameManager : MonoBehaviour {
 
 	// Update is called once per frame
 	private void Update () {
+		if(tutorialMode && hmd.position.z > -40.76f)
+		{
+			tutorialMode = false;
+			scoreboard.SetActive(true);
+		}
 		if (debugEnabled)
 		{
             DebugHead.position = CalcActualHeadPos();
@@ -558,6 +573,12 @@ public class GameManager : MonoBehaviour {
 			if (isBothHandsFaceDown())
 			{
 				isHovering = true;
+				if(tutorialMode && panel4.activeSelf)
+				{
+					panel4.GetComponentInChildren<Text>().text = "Nicely done!  The game will begin when you enter the arena.  Destroy the turrets and save your ally!";
+					tutorialMode = false;
+					StartCoroutine(DisablePanel(5f, panel4, scoreboard));
+				}
 				hoverEffect.Play();
 				// TODO: make this more smooth
 				float groundHeight = getGroundHeight(playerCharController.transform.position);
@@ -587,6 +608,7 @@ public class GameManager : MonoBehaviour {
             if (OVRInput.GetDown(OVRInput.RawButton.RHandTrigger))
             {
 				// TODO:
+
 				if (inHolsterRange())
 				{
 					if (!holdingLightsaber)
@@ -597,7 +619,13 @@ public class GameManager : MonoBehaviour {
 				else if (currRHandObservedObj != null)
 				{
                     initializeGrab(Hand.RIGHT);
-                }
+					if (tutorialMode && panel1.activeSelf)
+					{
+						panel1.GetComponentInChildren<Text>().text = "Awesome!  Now you can move it around.  Extend your arm to move the object away and retract your arm to pull it towards you.";
+						IEnumerator coroutine = DisablePanel(10f, panel1, panel2);
+						StartCoroutine(coroutine);
+					}
+				}
             }
             else if (OVRInput.Get(OVRInput.RawButton.RHandTrigger) && currSelectedRObj != null)
             {
@@ -616,7 +644,13 @@ public class GameManager : MonoBehaviour {
             if (OVRInput.GetDown(OVRInput.RawButton.LHandTrigger) && currLHandObservedObj != null)
             {
                 initializeGrab(Hand.LEFT);
-            }
+				if (tutorialMode && panel1.activeSelf)
+				{
+					panel1.GetComponentInChildren<Text>().text = "Awesome!  Now you can move it around.  Extend your arm to move the object away and retract your arm to pull it towards you.";
+					IEnumerator coroutine = DisablePanel(10f, panel1, panel2);
+					StartCoroutine(coroutine);
+				}
+			}
             else if (OVRInput.Get(OVRInput.RawButton.LHandTrigger) && currSelectedLObj != null)
             {
                 maintainGrab(Hand.LEFT);
@@ -647,11 +681,19 @@ public class GameManager : MonoBehaviour {
 				rightIndicator.SetPosition(0, currSelectedRObj.transform.position);
 				float indicatorLength = Mathf.Min(10f, (Time.time - startRChargeTime) * 5f);
 				rightIndicator.SetPosition(1, currSelectedRObj.transform.position + controllers[1].forward * indicatorLength);
+				if (indicatorLength == 10f && tutorialMode && panel2.activeSelf)
+				{
+					panel2.GetComponentInChildren<Text>().text = "Aim and release.";
+				}
 			}
 			else if (OVRInput.GetUp(OVRInput.RawButton.RIndexTrigger) && currSelectedRObj != null)
 			{
 				rightIndicator.enabled = false;
 				releasePushWithObj(Hand.RIGHT);
+				if(tutorialMode && panel2.activeSelf)
+				{
+					StartCoroutine(DisablePanel(2f, panel2, panel3));
+				}
 			}
 			else if (OVRInput.GetUp(OVRInput.RawButton.RIndexTrigger) && currSelectedRObj == null)
 			{
@@ -673,13 +715,21 @@ public class GameManager : MonoBehaviour {
 			else if (OVRInput.Get(OVRInput.RawButton.LIndexTrigger) && currSelectedLObj != null)
 			{
 				leftIndicator.SetPosition(0, currSelectedLObj.transform.position);
-				float indicatorLength = Mathf.Min(10f, (Time.time - startRChargeTime) * 5f);
+				float indicatorLength = Mathf.Min(10f, (Time.time - startLChargeTime) * 5f);
 				leftIndicator.SetPosition(1, currSelectedLObj.transform.position + controllers[0].forward * indicatorLength);
+				if (indicatorLength == 10f && tutorialMode && panel2.activeSelf)
+				{
+					panel2.GetComponentInChildren<Text>().text = "Aim and release.";
+				}
 			}
 			else if (OVRInput.GetUp(OVRInput.RawButton.LIndexTrigger) && CurrSelectedLObj != null)
 			{
 				leftIndicator.enabled = false;
 				releasePushWithObj(Hand.LEFT);
+				if (tutorialMode && panel2.activeSelf)
+				{
+					StartCoroutine(DisablePanel(2f, panel2, panel3));
+				}
 			}
 			else if (OVRInput.GetUp(OVRInput.RawButton.LIndexTrigger) && currSelectedLObj == null)
 			{
@@ -709,8 +759,25 @@ public class GameManager : MonoBehaviour {
 		}
 	} // end of Update()
 
+	IEnumerator DisablePanel(float time, GameObject go, GameObject nextPanel)
+	{
+		yield return new WaitForSeconds(time);
+		go.SetActive(false);
+		nextPanel.SetActive(true);
+		yield break;
+	}
+
 	public void EndGame()
 	{
 
+	}
+
+	public void ContinueTutorial()
+	{
+		if(panel3.activeSelf)
+		{
+			panel3.GetComponentInChildren<Text>().text = "Great!  You can also use the index trigger without holding an object to push multiple objects.";
+			StartCoroutine(DisablePanel(12f, panel3, panel4));
+		}
 	}
 }
