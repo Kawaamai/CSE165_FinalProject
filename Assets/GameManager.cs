@@ -870,11 +870,12 @@ public class GameManager : MonoBehaviour {
 
 	public void Reset()
 	{
-		GameObject[] turrets = GameObject.FindGameObjectsWithTag("Turret");
+		GameObject[] turrets = TurretBehavior.deactivatedTurrets;
 		for(int i = 0; i < turrets.Length; i++)
 		{
-			turrets[i].transform.parent.gameObject.SetActive(true);
+			turrets[i].SetActive(true);
 		}
+		TurretBehavior.deactivatedArrayHead = 0;
 		ai.GetComponent<AIBehavior>().Reset();
 	}
 
