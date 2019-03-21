@@ -10,6 +10,13 @@ public class AIBehavior : MonoBehaviour {
 	private bool hasDest;
 	private NavMeshAgent nmagent;
 	private float health = 100f;
+	public float Health
+	{
+		get
+		{
+			return health;
+		}
+	}
 	public GameObject healthBar;
 
 	// Use this for initialization
@@ -27,11 +34,17 @@ public class AIBehavior : MonoBehaviour {
 		if (health <= 0f)
 		{
 			health = 0f;
-			Destroy(nmagent);
+			nmagent.speed = 0f;
 			anim.SetBool("isDead", true);
-			GameManager.Inst.EndGame();
 			GetComponent<Rigidbody>().velocity = Vector3.zero;
 		}
+	}
+
+	public void Reset()
+	{
+		health = 100f;
+		nmagent.speed = 7f;
+		anim.SetBool("isDead", false);
 	}
 	
 	// Update is called once per frame
@@ -50,11 +63,7 @@ public class AIBehavior : MonoBehaviour {
 
 			anim.SetBool("isIdle", false);
 			anim.SetBool("isRunning", true);
-			if(GetComponent<NavMeshAgent>() != null)
-			{
-                // FIXME: this is throwing an error when the agent dies??
-				nmagent.SetDestination(new Vector3(currDest.x, transform.position.y, currDest.y));
-			}
+			nmagent.SetDestination(new Vector3(currDest.x, transform.position.y, currDest.y));
 			if (Vector3.Distance(transform.position, new Vector3(currDest.x, 0f, currDest.y)) < 2f)
 			{
 				hasDest = false;

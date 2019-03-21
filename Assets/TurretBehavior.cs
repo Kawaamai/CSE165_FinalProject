@@ -37,7 +37,7 @@ public class TurretBehavior : MonoBehaviour {
 		explode.transform.position = transform.position;
 		explode.transform.localScale = new Vector3(2f, 2f, 2f);
 		remaining -= 1;
-		Destroy(transform.parent.gameObject);
+		transform.parent.gameObject.SetActive(false);
 	}
 
 	void OnCollisionEnter(Collision col)
@@ -50,6 +50,11 @@ public class TurretBehavior : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+		if(GameManager.Inst.ai.GetComponent<AIBehavior>().Health <= 0f)
+		{
+			laser.enabled = false;
+			return;
+		}
 		if (!laser.enabled)
 		{
 			Vector3 direction = GameManager.Inst.ai.position - transform.position;
