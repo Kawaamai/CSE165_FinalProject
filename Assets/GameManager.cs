@@ -868,6 +868,16 @@ public class GameManager : MonoBehaviour {
 
 	}
 
+	public void Reset()
+	{
+		GameObject[] turrets = GameObject.FindGameObjectsWithTag("Turret");
+		for(int i = 0; i < turrets.Length; i++)
+		{
+			turrets[i].transform.parent.gameObject.SetActive(true);
+		}
+		ai.GetComponent<AIBehavior>().Reset();
+	}
+
 	public void ContinueTutorial()
 	{
 		if(panel3.activeSelf)
