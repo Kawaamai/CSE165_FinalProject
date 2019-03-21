@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour {
 
 	//Tutorial shit
-	private bool tutorialMode = true;
+	private bool tutorialMode = false;
 	public GameObject panel1;
 	public GameObject panel2;
 	public GameObject panel3;
@@ -51,7 +51,7 @@ public class GameManager : MonoBehaviour {
 	// Deactivate movement by doing one of the following:
 	// 1. Close hands
 	// 2. move hands above hoverHandHeightThresh
-	private float moveSpeed = 2f;
+	private float moveSpeed = 5f;
 	private float hoverHeight = 0.02f;
 	private bool isHovering = false;
 	private float hoverHandHeightThresh = 1.9f;
@@ -133,6 +133,9 @@ public class GameManager : MonoBehaviour {
 		DebugHead.gameObject.SetActive(debugEnabled);
 		DebugHeight.gameObject.SetActive(debugEnabled);
         isHumanJoystick = false;
+		if(tutorialMode) {
+			panel1.SetActive(true);
+		}
 	}
 
 	private void castRay(Hand hand)
@@ -627,7 +630,8 @@ public class GameManager : MonoBehaviour {
                         tutorialMode = false;
                         StartCoroutine(DisablePanel(5f, panel4, scoreboard));
                     }
-                    hoverEffect.Play();
+                    if (!hoverEffect.isPlaying)
+                        hoverEffect.Play();
                     // TODO: make this more smooth
                     float groundHeight = getGroundHeight(playerCharController.transform.position);
                     if (playerCharController.isGrounded || groundHeight - playerCharController.height < hoverHeight)
@@ -644,7 +648,8 @@ public class GameManager : MonoBehaviour {
             {
                 if (isHovering)
                 {
-                    hoverEffect.Stop();
+                    if (hoverEffect.isPlaying)
+                    	hoverEffect.Stop();
                 }
                 playerCharController.Move(Vector3.down * Time.deltaTime);
                 lastMoveDir = MoveDir.NONE;
@@ -667,7 +672,8 @@ public class GameManager : MonoBehaviour {
                     tutorialMode = false;
                     StartCoroutine(DisablePanel(5f, panel4, scoreboard));
                 }
-                hoverEffect.Play();
+                if (!hoverEffect.isPlaying)
+                	hoverEffect.Play();
                 // TODO: make this more smooth
                 float groundHeight = getGroundHeight(playerCharController.transform.position);
                 if (playerCharController.isGrounded || groundHeight - playerCharController.height < hoverHeight)
@@ -683,7 +689,8 @@ public class GameManager : MonoBehaviour {
             {
                 if (isHovering)
                 {
-                    hoverEffect.Stop();
+                    if (hoverEffect.isPlaying)
+						hoverEffect.Stop();
                 }
                 playerCharController.Move(Vector3.down * Time.deltaTime);
                 lastMoveDir = MoveDir.NONE;
