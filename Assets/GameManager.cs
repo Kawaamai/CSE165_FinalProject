@@ -871,7 +871,7 @@ public class GameManager : MonoBehaviour {
 	public void Reset()
 	{
 		GameObject[] turrets = TurretBehavior.deactivatedTurrets;
-		for(int i = 0; i < turrets.Length; i++)
+		for(int i = 0; i < TurretBehavior.deactivatedArrayHead; i++)
 		{
 			turrets[i].SetActive(true);
 		}
