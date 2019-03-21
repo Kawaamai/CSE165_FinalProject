@@ -11,9 +11,11 @@ public class LightsaberBlade : MonoBehaviour {
 	float bladeExtendLerp = 0f;
 
 	private float textureOffset = 0f;
+	private bool extended;
 
 	// Use this for initialization
 	void Start () {
+		extended = false;
 		endPos.localPosition = startPos.localPosition;
 		lr.SetPosition(0, startPos.position);
 		lr.SetPosition(1, startPos.position);
@@ -24,6 +26,7 @@ public class LightsaberBlade : MonoBehaviour {
 
 		lr.SetPosition(0, startPos.position);
 
+		// FIXME: what is this?
 		textureOffset -= Time.deltaTime*2f;
 		if (textureOffset < -10f)
 		{
@@ -31,10 +34,16 @@ public class LightsaberBlade : MonoBehaviour {
 		}
 		lr.sharedMaterials[1].SetTextureOffset("_MainTex", new Vector2(textureOffset, 0f));
 
-		if(lr.enabled == true)
+		if(!extended && lr.enabled == true)
 		{
 			bladeExtendLerp += Time.deltaTime * 2f;
 			endPos.localPosition = Vector3.Lerp(startPos.localPosition, new Vector3(0f, length, 0f), bladeExtendLerp);
+			if (bladeExtendLerp >= 1f)
+				extended = true;
+		}
+		else
+		{
+			endPos.localPosition = startPos.localPosition + new Vector3(0f, length, 0f);
 		}
 		lr.SetPosition(1, endPos.position);
 	}
@@ -61,6 +70,7 @@ public class LightsaberBlade : MonoBehaviour {
 		lr.enabled = false;
 		bladeExtendLerp = 0f;
 		endPos.position = startPos.position;
+		extended = false;
 		if (GetComponent<Collider>() != null)
 		{
 			GetComponent<Collider>().enabled = false;

@@ -148,8 +148,10 @@ public class GameManager : MonoBehaviour {
 		{
 			float dist = Vector3.Cross(ray.direction, objs[i].transform.position - ray.origin).magnitude;
 			// if (dist < min && dist < (Mathf.Sin(15f * Mathf.Deg2Rad) * Vector3.Distance(objs[i].transform.position, hmd.position)))
+			// if (dist < min && dist < (Mathf.Sin(15f * Mathf.Deg2Rad) * Vector3.Distance(objs[i].transform.position, actualHeadPos))
+			// 	&& Vector3.Distance(objs[i].transform.position, controllers[controller].position) < 30f)
 			if (dist < min && dist < (Mathf.Sin(15f * Mathf.Deg2Rad) * Vector3.Distance(objs[i].transform.position, actualHeadPos))
-				&& Vector3.Distance(objs[i].transform.position, controllers[controller].position) < 30f)
+				&& Vector3.Distance(objs[i].transform.position, controllers[controller].position) < 100f)
 			{
 				min = dist;
 				idx = i;
@@ -579,7 +581,7 @@ public class GameManager : MonoBehaviour {
     
     private bool isHumanJoystickOverThresh()
     {
-        return GetHeadBaseOffset().sqrMagnitude > 0.04f;
+        return GetHeadBaseOffset().sqrMagnitude > 0.02f;
     }
 
     private Vector3 getHumanJoystickMoveDir()

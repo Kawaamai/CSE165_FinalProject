@@ -16,6 +16,7 @@ public class MenuManager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         OutputLightsaberColor();	    	
+        Debug.Log(lightsaber.colorGradient.colorKeys.Length);
 	}
 	
 	// Update is called once per frame
@@ -27,7 +28,7 @@ public class MenuManager : MonoBehaviour {
             // determine if hit any component
             // highlight
             // TODO: play with these offsets for the right index finger position
-            Ray ray = new Ray(controllers[0].position + (controllers[0].up * .01f) + (controllers[0].right * .02f), controllers[0].forward);
+            Ray ray = new Ray(controllers[0].position + (controllers[0].up * .01f) + (controllers[0].right * .015f), controllers[0].forward);
             RaycastHit hit;
 
             if (Physics.Raycast(ray, out hit, 2f))
@@ -63,13 +64,13 @@ public class MenuManager : MonoBehaviour {
                             switch (t.gameObject.name)
                             {
                                 case "RGBTextR":
-                                    lightsaber.startColor = lightsaber.startColor + (new Color(.2f,0f,0f) * Time.deltaTime);
+                                    SetLightsaberColor(lightsaber.startColor + (new Color(.2f,0f,0f) * Time.deltaTime));
                                     break;
                                 case "RGBTextG":
-                                    lightsaber.startColor = lightsaber.startColor + (new Color(0f,.2f,0f) * Time.deltaTime);
+                                    SetLightsaberColor(lightsaber.startColor + (new Color(0f,.2f,0f) * Time.deltaTime));
                                     break;
                                 case "RGBTextB":
-                                    lightsaber.startColor = lightsaber.startColor + (new Color(0f,0f,.2f) * Time.deltaTime);
+                                    SetLightsaberColor(lightsaber.startColor + (new Color(0f,0f,.2f) * Time.deltaTime));
                                     break;
                             }
                         }
@@ -78,13 +79,13 @@ public class MenuManager : MonoBehaviour {
                             switch (t.gameObject.name)
                             {
                                 case "RGBTextR":
-                                    lightsaber.startColor = lightsaber.startColor - (new Color(.2f,0f,0f) * Time.deltaTime);
+                                    SetLightsaberColor(lightsaber.startColor - (new Color(.2f,0f,0f) * Time.deltaTime));
                                     break;
                                 case "RGBTextG":
-                                    lightsaber.startColor = lightsaber.startColor - (new Color(0f,.2f,0f) * Time.deltaTime);
+                                    SetLightsaberColor(lightsaber.startColor - (new Color(0f,.2f,0f) * Time.deltaTime));
                                     break;
                                 case "RGBTextB":
-                                    lightsaber.startColor = lightsaber.startColor - (new Color(0f,0f,.2f) * Time.deltaTime);
+                                    SetLightsaberColor(lightsaber.startColor - (new Color(0f,0f,.2f) * Time.deltaTime));
                                     break;
                             }
                         }
@@ -132,6 +133,14 @@ public class MenuManager : MonoBehaviour {
                 t.color = Color.blue;
                 break;
         }
+    }
+
+    private void SetLightsaberColor(Color c)
+    {
+        float startalpha = lightsaber.startColor.a;
+        float endalpha= lightsaber.endColor.a;
+        lightsaber.startColor = new Color(c.r, c.g, c.b, startalpha);
+        lightsaber.endColor = new Color(c.r, c.g, c.b, endalpha);
     }
 
     private void unhighlightText(Text t)
