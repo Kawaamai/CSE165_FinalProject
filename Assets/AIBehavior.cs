@@ -42,7 +42,8 @@ public class AIBehavior : MonoBehaviour {
 
 	public void Reset()
 	{
-		health = 100f;
+        healthBar.transform.localScale = new Vector3(1f, 1f, 1f);
+        health = 100f;
 		nmagent.speed = 7f;
 		anim.SetBool("isDead", false);
 	}

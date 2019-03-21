@@ -52,6 +52,7 @@ public class MenuManager : MonoBehaviour {
                             else
                             {
                                 GameManager.Inst.isHumanJoystick = true;
+                                GameManager.Inst.SetBaseHeadPos();
                                 t.text = "Movement:\nHuman Joystick";
                             }
                         }

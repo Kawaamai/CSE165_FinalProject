@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour {
 
 	//Tutorial shit
-	private bool tutorialMode = false;
+	private bool tutorialMode = true;
 	public GameObject panel1;
 	public GameObject panel2;
 	public GameObject panel3;
@@ -572,7 +572,7 @@ public class GameManager : MonoBehaviour {
 	}
 
     // HUMAN JOYSTICK SHIT
-    private void SetBaseHeadPos()
+    public void SetBaseHeadPos()
     {
         baseHeadPosition = hmd.localPosition;
     }
@@ -589,7 +589,7 @@ public class GameManager : MonoBehaviour {
 
     private Vector3 getHumanJoystickMoveDir()
     {
-        return GetHeadBaseOffset().normalized;
+        return playerCharController.transform.rotation * GetHeadBaseOffset().normalized;
     }
     // END HUMAN JOYSTICK SHIT
 
