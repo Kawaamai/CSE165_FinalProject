@@ -51,8 +51,8 @@ public class GameManager : MonoBehaviour {
 	// Deactivate movement by doing one of the following:
 	// 1. Close hands
 	// 2. move hands above hoverHandHeightThresh
-	private float moveSpeed = 0.04f;
-	private float hoverHeight = 0.05f;
+	private float moveSpeed = 0.05f;
+	private float hoverHeight = 0.02f;
 	private bool isHovering = false;
 	private float hoverHandHeightThresh = 1.9f;
 	private float hoverHandDeadzone = 0.15f;
@@ -117,6 +117,11 @@ public class GameManager : MonoBehaviour {
 	public LightsaberBlade lightsaberBladeInner;
 	private bool holdingLightsaber = false;
 
+    // human joystick
+    public bool isHumanJoystick = true;
+    private bool initBaseHeadPosSet = false;
+    private Vector3 baseHeadPosition;
+
 	// Use this for initialization
 	void Start () {
 		rightIndicator.enabled = false;
@@ -127,6 +132,7 @@ public class GameManager : MonoBehaviour {
 		unequiptLightsaber();
 		DebugHead.gameObject.SetActive(debugEnabled);
 		DebugHeight.gameObject.SetActive(debugEnabled);
+        isHumanJoystick = true;
 	}
 
 	private void castRay(Hand hand)
@@ -385,6 +391,15 @@ public class GameManager : MonoBehaviour {
 		return lastMoveDir;
 	}
 
+    private void HumanJoystickMove()
+    {
+        if (isHumanJoystickOverThresh())
+        {
+            Vector3 dir = getHumanJoystickMoveDir();
+            playerCharController.Move(dir * moveSpeed);
+        }
+    }
+
 	// will need later for movement
 	private float getGroundHeight(Vector3 pos)
 	{
@@ -551,6 +566,28 @@ public class GameManager : MonoBehaviour {
 		return (angleDiff < hoverHandAngleThresh);
 	}
 
+    // HUMAN JOYSTICK SHIT
+    private void SetBaseHeadPos()
+    {
+        baseHeadPosition = hmd.localPosition;
+    }
+
+    private Vector3 GetHeadBaseOffset()
+    {
+        return new Vector3(hmd.localPosition.x - baseHeadPosition.x, 0f, hmd.localPosition.z - baseHeadPosition.z);
+    }
+    
+    private bool isHumanJoystickOverThresh()
+    {
+        return GetHeadBaseOffset().sqrMagnitude > 0.04f;
+    }
+
+    private Vector3 getHumanJoystickMoveDir()
+    {
+        return GetHeadBaseOffset().normalized;
+    }
+    // END HUMAN JOYSTICK SHIT
+
 	// Update is called once per frame
 	private void Update () {
 		if(tutorialMode && hmd.position.z > -40.76f)
@@ -558,52 +595,101 @@ public class GameManager : MonoBehaviour {
 			tutorialMode = false;
 			scoreboard.SetActive(true);
 		}
+
+        if (!initBaseHeadPosSet && baseHeadPosition == Vector3.zero && hmd.localPosition != Vector3.zero)
+        {
+            SetBaseHeadPos();
+            initBaseHeadPosSet = true;
+        }
+        
 		if (debugEnabled)
 		{
             DebugHead.position = CalcActualHeadPos();
             DebugHeight.position = new Vector3(DebugHeight.position.x, CalcHoverHeightThresh(), DebugHeight.position.z);
 		}
 
-		hoverHandHeightThresh = CalcHoverHeightThresh();
-		if (!OVRInput.Get(OVRInput.RawButton.RIndexTrigger) && !OVRInput.Get(OVRInput.RawButton.RHandTrigger) &&
-			!OVRInput.Get(OVRInput.RawButton.LIndexTrigger) && !OVRInput.Get(OVRInput.RawButton.LHandTrigger) &&
-			isBothHandsBelowHoverThresh())
-		{
-			// if (isBothHandsInDeadzone())
-			if (isBothHandsFaceDown())
-			{
-				isHovering = true;
-				if(tutorialMode && panel4.activeSelf)
-				{
-					panel4.GetComponentInChildren<Text>().text = "Nicely done!  The game will begin when you enter the arena.  Destroy the turrets and save your ally!";
-					tutorialMode = false;
-					StartCoroutine(DisablePanel(5f, panel4, scoreboard));
-				}
-				hoverEffect.Play();
-				// TODO: make this more smooth
-				float groundHeight = getGroundHeight(playerCharController.transform.position);
-				if (playerCharController.isGrounded || groundHeight - playerCharController.height < hoverHeight)
-				{
-                    playerCharController.Move(Vector3.up * 0.02f);
-				}
-				else if (groundHeight == 1000f) // walked off edge. fly!
-				{
-                    playerCharController.Move(Vector3.up * 0.1f);
-				}
-			}
-		}
-		else
-		{
-            if (isHovering)
-			{
-				hoverEffect.Stop();
-			}
-			playerCharController.Move(Vector3.down * 0.02f);
-            lastMoveDir = MoveDir.NONE;
-			isHovering = false;
-		}
+        hoverHandHeightThresh = CalcHoverHeightThresh();
+        if (!isHumanJoystick)
+        {
+            if (!OVRInput.Get(OVRInput.RawButton.RIndexTrigger) && !OVRInput.Get(OVRInput.RawButton.RHandTrigger) &&
+                !OVRInput.Get(OVRInput.RawButton.LIndexTrigger) && !OVRInput.Get(OVRInput.RawButton.LHandTrigger) &&
+                isBothHandsBelowHoverThresh())
+            {
+                // if (isBothHandsInDeadzone())
+                if (isBothHandsFaceDown())
+                {
+                    isHovering = true;
+                    if (tutorialMode && panel4.activeSelf)
+                    {
+                        panel4.GetComponentInChildren<Text>().text = "Nicely done!  The game will begin when you enter the arena.  Destroy the turrets and save your ally!";
+                        tutorialMode = false;
+                        StartCoroutine(DisablePanel(5f, panel4, scoreboard));
+                    }
+                    hoverEffect.Play();
+                    // TODO: make this more smooth
+                    float groundHeight = getGroundHeight(playerCharController.transform.position);
+                    if (playerCharController.isGrounded || groundHeight - playerCharController.height < hoverHeight)
+                    {
+                        playerCharController.Move(Vector3.up * 0.008f);
+                    }
+                    else if (groundHeight == 1000f) // walked off edge. fly!
+                    {
+                        playerCharController.Move(Vector3.up * 0.1f);
+                    }
+                }
+            }
+            else
+            {
+                if (isHovering)
+                {
+                    hoverEffect.Stop();
+                }
+                playerCharController.Move(Vector3.down * 0.02f);
+                lastMoveDir = MoveDir.NONE;
+                isHovering = false;
+            }
+        }
+        else
+        {
+            if (isBothHandsBelowHoverThresh() && isBothHandsFaceDown())
+            {
+                SetBaseHeadPos();
+            }
 
-		if (!isHovering)
+            if (isHumanJoystickOverThresh())
+            {
+                isHovering = true;
+                if (tutorialMode && panel4.activeSelf)
+                {
+                    panel4.GetComponentInChildren<Text>().text = "Nicely done!  The game will begin when you enter the arena.  Destroy the turrets and save your ally!";
+                    tutorialMode = false;
+                    StartCoroutine(DisablePanel(5f, panel4, scoreboard));
+                }
+                hoverEffect.Play();
+                // TODO: make this more smooth
+                float groundHeight = getGroundHeight(playerCharController.transform.position);
+                if (playerCharController.isGrounded || groundHeight - playerCharController.height < hoverHeight)
+                {
+                    playerCharController.Move(Vector3.up * 0.008f);
+                }
+                else if (groundHeight == 1000f) // walked off edge. fly!
+                {
+                    playerCharController.Move(Vector3.up * 0.04f);
+                }
+            }
+            else
+            {
+                if (isHovering)
+                {
+                    hoverEffect.Stop();
+                }
+                playerCharController.Move(Vector3.down * 0.02f);
+                lastMoveDir = MoveDir.NONE;
+                isHovering = false;
+            }
+        }
+
+        if (isHumanJoystick || !isHovering)
 		{
             if (OVRInput.GetDown(OVRInput.RawButton.RHandTrigger))
             {
@@ -749,14 +835,22 @@ public class GameManager : MonoBehaviour {
                 }
             }
         }
-		else // hovering
+
+		if (isHovering)// hovering
 		{
 			// find direction of travel
 			// MoveDir dir = GetMoveDir();
 			// HoverMove(dir);
-			HoverMove();
-			HoverRotate();
-		}
+            if (!isHumanJoystick)
+            {
+                HoverMove();
+                HoverRotate();
+            }
+            else
+            {
+                HumanJoystickMove();
+            }
+        }
 	} // end of Update()
 
 	IEnumerator DisablePanel(float time, GameObject go, GameObject nextPanel)

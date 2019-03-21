@@ -52,6 +52,7 @@ public class AIBehavior : MonoBehaviour {
 			anim.SetBool("isRunning", true);
 			if(GetComponent<NavMeshAgent>() != null)
 			{
+                // FIXME: this is throwing an error when the agent dies??
 				nmagent.SetDestination(new Vector3(currDest.x, transform.position.y, currDest.y));
 			}
 			if (Vector3.Distance(transform.position, new Vector3(currDest.x, 0f, currDest.y)) < 2f)

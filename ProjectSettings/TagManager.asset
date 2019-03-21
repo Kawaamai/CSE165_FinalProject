@@ -10,6 +10,7 @@ TagManager:
   - AI
   - Turret
   - crate
+  - menu
   layers:
   - Default
   - TransparentFX
